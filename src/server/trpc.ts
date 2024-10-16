@@ -1,13 +1,19 @@
 import { initTRPC } from "@trpc/server"
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch"
 import SuperJSON from "superjson"
+import type { EventHandlerRequest, H3Event } from "vinxi/http"
 import { ZodError } from "zod"
 
-export const createTRPCContext = (opts: FetchCreateContextFnOptions) => {
+interface ContextOptions extends FetchCreateContextFnOptions {
+	event: H3Event<EventHandlerRequest>
+}
+
+export const createTRPCContext = (opts: ContextOptions) => {
 	const source = opts.req.headers.get("x-trpc-source")
 	console.log(">>> tRPC Request from", source ?? "Unknown")
 
 	return {
+		event: opts.event,
 		request: opts.req
 	}
 }

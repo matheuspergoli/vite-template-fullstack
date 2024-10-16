@@ -10,7 +10,7 @@ export default defineEventHandler((event) => {
 		endpoint: "/trpc",
 		req: request,
 		router: appRouter,
-		createContext: createTRPCContext,
+		createContext: (opts) => createTRPCContext({ ...opts, event }),
 		onError: (opts) => {
 			console.log("TRPC Error", {
 				data: opts.error.name,

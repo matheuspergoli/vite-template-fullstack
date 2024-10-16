@@ -7,7 +7,7 @@ import {
 } from "@trpc/react-query"
 import SuperJSON from "superjson"
 
-import { env } from "@/environment/env"
+import { clientEnv } from "@/environment/env"
 import type { AppRouter } from "@/server/root"
 
 export const api = createTRPCReact<AppRouter>()
@@ -18,7 +18,9 @@ export const trpcClient = api.createClient({
 	links: [
 		loggerLink({
 			enabled: (opts) => {
-				return env.DEV || (opts.direction === "down" && opts.result instanceof Error)
+				return (
+					clientEnv.DEV || (opts.direction === "down" && opts.result instanceof Error)
+				)
 			},
 			colorMode: "css"
 		}),
