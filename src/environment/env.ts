@@ -16,7 +16,9 @@ export const clientEnv = createEnv({
 })
 
 export const serverEnv = createEnv({
-	server: {},
+	server: {
+		NODE_ENV: z.enum(["development", "production", "test"]).default("development")
+	},
 	runtimeEnv: process.env,
 	emptyStringAsUndefined: true
 })

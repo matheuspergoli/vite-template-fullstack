@@ -5,6 +5,7 @@ import type { EventHandlerRequest, H3Event } from "vinxi/http"
 import { ZodError } from "zod"
 
 interface ContextOptions extends FetchCreateContextFnOptions {
+	clientIP: string | undefined
 	event: H3Event<EventHandlerRequest>
 }
 
@@ -14,7 +15,8 @@ export const createTRPCContext = (opts: ContextOptions) => {
 
 	return {
 		event: opts.event,
-		request: opts.req
+		request: opts.req,
+		clientIP: opts.clientIP
 	}
 }
 

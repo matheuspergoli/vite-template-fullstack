@@ -5,7 +5,7 @@ import { routeTree } from "./routeTree.gen"
 
 export const router = createRouter({
 	routeTree,
-	defaultPreload: "intent",
+	defaultPreload: "viewport",
 	context: { api, queryClient, trpcQueryUtils },
 	defaultErrorComponent: ({ error }) => <ErrorComponent error={error} />,
 	defaultPendingComponent: () => <p className="p-2 text-2xl">Loading...</p>,
