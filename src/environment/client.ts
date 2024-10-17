@@ -14,11 +14,3 @@ export const clientEnv = createEnv({
 	runtimeEnv: import.meta.env,
 	emptyStringAsUndefined: true
 })
-
-export const serverEnv = createEnv({
-	server: {
-		NODE_ENV: z.enum(["development", "production", "test"]).default("development")
-	},
-	runtimeEnv: process.env,
-	emptyStringAsUndefined: true
-})

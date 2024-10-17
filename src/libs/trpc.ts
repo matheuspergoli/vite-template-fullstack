@@ -7,7 +7,7 @@ import {
 } from "@trpc/react-query"
 import SuperJSON from "superjson"
 
-import { clientEnv } from "@/environment/env"
+import { clientEnv } from "@/environment/client"
 import type { AppRouter } from "@/server/root"
 
 export const api = createTRPCReact<AppRouter>()
@@ -25,8 +25,8 @@ export const trpcClient = api.createClient({
 			colorMode: "css"
 		}),
 		httpBatchLink({
-			transformer: SuperJSON,
 			url: "/trpc",
+			transformer: SuperJSON,
 			headers() {
 				const headers = new Map<string, string>()
 				headers.set("x-trpc-source", "vite-react")
