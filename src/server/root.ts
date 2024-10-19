@@ -1,9 +1,11 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server"
 
+import { authRouter } from "./routers/auth"
 import { exampleRouter } from "./routers/example"
 import { createCallerFactory, createTRPCContext, createTRPCRouter } from "./trpc"
 
 const appRouter = createTRPCRouter({
+	auth: authRouter,
 	example: exampleRouter
 })
 

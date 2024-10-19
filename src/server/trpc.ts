@@ -1,8 +1,14 @@
-import { initTRPC } from "@trpc/server"
+import { initTRPC, TRPCError } from "@trpc/server"
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch"
 import SuperJSON from "superjson"
-import type { EventHandlerRequest, H3Event } from "vinxi/http"
+import { getCookie, setCookie, type EventHandlerRequest, type H3Event } from "vinxi/http"
 import { ZodError } from "zod"
+
+import { serverEnv } from "@/environment/server"
+import { globalPOSTRateLimit } from "@/libs/rate-limit"
+import { TimeSpan } from "@/libs/time-span"
+
+import { db } from "./db/client"
 
 interface ContextOptions extends FetchCreateContextFnOptions {
 	clientIP: string | undefined
@@ -14,6 +20,7 @@ export const createTRPCContext = (opts: ContextOptions) => {
 	console.log(">>> tRPC Request from", source ?? "Unknown")
 
 	return {
+		db,
 		event: opts.event,
 		request: opts.req,
 		clientIP: opts.clientIP
@@ -27,6 +34,70 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 		data: {
 			...shape.data,
 			zodError: error.cause instanceof ZodError ? error.cause.flatten() : null
+		}
+	})
+})
+
+const csrfProtectionMiddleware = t.middleware(async ({ next, ctx }) => {
+	const { event, request } = ctx
+
+	if (request.method === "GET") {
+		const maxAge = new TimeSpan(30, "d")
+		const token = getCookie(event, "session")
+
+		if (token) {
+			setCookie(event, "session", token, {
+				path: "/",
+				maxAge: maxAge.seconds(),
+				sameSite: "lax",
+				httpOnly: true,
+				secure: serverEnv.NODE_ENV === "production"
+			})
+		}
+
+		return next()
+	}
+
+	const originHeader = request.headers.get("Origin")
+	const hostHeader = request.headers.get("Host")
+
+	if (originHeader === null || hostHeader === null) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Origin or Host header missing"
+		})
+	}
+
+	const origin = new URL(originHeader)
+
+	if (origin.host !== hostHeader) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Origin and Host header mismatch"
+		})
+	}
+
+	return next()
+})
+
+export const globalMutationRateLimitMiddleware = t.middleware(async ({ next, ctx }) => {
+	if (!ctx.clientIP) {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: "Could not get client IP"
+		})
+	}
+
+	if (!globalPOSTRateLimit({ clientIP: ctx.clientIP })) {
+		throw new TRPCError({
+			code: "TOO_MANY_REQUESTS",
+			message: "Too many requests"
+		})
+	}
+
+	return next({
+		ctx: {
+			clientIP: ctx.clientIP
 		}
 	})
 })
@@ -47,7 +118,9 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 	return result
 })
 
-export const publicProcedure = t.procedure.use(timingMiddleware)
+export const publicProcedure = t.procedure
+	.use(timingMiddleware)
+	.use(csrfProtectionMiddleware)
 
 export const {
 	router: createTRPCRouter,
