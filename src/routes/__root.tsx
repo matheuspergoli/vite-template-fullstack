@@ -8,7 +8,6 @@ import { createTRPCQueryUtils } from "@trpc/react-query"
 
 import { api, queryClient } from "@/libs/trpc"
 import type { AppRouter } from "@/server/root"
-import { ActiveLink } from "@/shared/components/active-link"
 
 export const Route = createRootRouteWithContext<{
 	api: typeof api
@@ -18,11 +17,6 @@ export const Route = createRootRouteWithContext<{
 	component: () => {
 		return (
 			<>
-				<nav className="flex gap-2 p-2">
-					<ActiveLink to="/">Home</ActiveLink>
-					<ActiveLink to="/about">About</ActiveLink>
-				</nav>
-				<hr />
 				<ScrollRestoration />
 				<Outlet />
 			</>

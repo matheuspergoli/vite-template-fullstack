@@ -2,6 +2,7 @@ import React from "react"
 import { RouterProvider } from "@tanstack/react-router"
 
 import { clientEnv } from "./environment/client"
+import { ThemeProvider } from "./providers/theme-provider"
 import { TRPCProvider } from "./providers/trpc-provider"
 import { router } from "./router"
 
@@ -20,10 +21,12 @@ const TanStackRouterDevtools = clientEnv.PROD
 export const App = () => {
 	return (
 		<TRPCProvider>
-			<InnerApp />
-			<React.Suspense>
-				<TanStackRouterDevtools router={router} position="bottom-right" />
-			</React.Suspense>
+			<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+				<InnerApp />
+				<React.Suspense>
+					<TanStackRouterDevtools router={router} position="bottom-right" />
+				</React.Suspense>
+			</ThemeProvider>
 		</TRPCProvider>
 	)
 }
