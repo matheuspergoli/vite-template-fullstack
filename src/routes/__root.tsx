@@ -4,7 +4,6 @@ import {
 	ScrollRestoration
 } from "@tanstack/react-router"
 
-import { TanStackRouterDevtools } from "@tanstack/router-devtools"
 import { createTRPCQueryUtils } from "@trpc/react-query"
 
 import { api, queryClient } from "@/libs/trpc"
@@ -26,7 +25,6 @@ export const Route = createRootRouteWithContext<{
 				<hr />
 				<ScrollRestoration />
 				<Outlet />
-				<TanStackRouterDevtools />
 			</>
 		)
 	}

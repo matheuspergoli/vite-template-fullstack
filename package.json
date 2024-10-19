@@ -10,7 +10,7 @@
 		"typecheck": "tsc --noEmit",
 		"clean": "rm -rf node_modules .vinxi .output",
 		"format": "prettier --write \"**/*.{ts,tsx,json}\"",
-		"start": "NODE_ENV=production node --env-file=./.env .output/server/index.mjs"
+		"start": "node --env-file=./.env .output/server/index.mjs"
 	},
 	"dependencies": {
 		"@radix-ui/react-icons": "^1.3.0",
