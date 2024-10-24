@@ -189,6 +189,7 @@ export const getCurrentUser = async (event: Event) => {
 
 export const setSession = async ({ userId, event }: { userId: string; event: Event }) => {
 	await invalidateUserSessions({ userId })
+	deleteSessionTokenCookie(event)
 
 	const token = generateSessionToken()
 	const session = await createSession({ token, userId })

@@ -10,11 +10,7 @@ import {
 } from "@/libs/password"
 
 import { usersTable } from "../db/schema"
-import {
-	deleteSessionTokenCookie,
-	invalidateUserSessions,
-	setSession
-} from "../services/sessions"
+import { setSession } from "../services/sessions"
 import { createTRPCRouter, publicProcedure } from "../trpc"
 import { generateId } from "../utils/generate-id"
 
@@ -50,8 +46,6 @@ export const authRouter = createTRPCRouter({
 				})
 			}
 
-			await invalidateUserSessions({ userId: existingUser.id })
-			deleteSessionTokenCookie(ctx.event)
 			await setSession({ userId: existingUser.id, event: ctx.event })
 		}),
 	signup: publicProcedure
@@ -111,8 +105,6 @@ export const authRouter = createTRPCRouter({
 				})
 			}
 
-			await invalidateUserSessions({ userId })
-			deleteSessionTokenCookie(ctx.event)
 			await setSession({ userId: user.id, event: ctx.event })
 		})
 })
