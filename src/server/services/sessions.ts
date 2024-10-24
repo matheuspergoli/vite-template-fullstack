@@ -6,16 +6,18 @@ import { getCookie, setCookie, type EventHandlerRequest, type H3Event } from "vi
 import { serverEnv } from "@/environment/server"
 import { createDate, isWithinExpirationDate, TimeSpan } from "@/libs/time-span"
 import { db } from "@/server/db/client"
-import { sessionsTable, usersTable } from "@/server/db/schema"
+import {
+	sessionsTable,
+	usersTable,
+	type SessionSelect,
+	type UserSelect
+} from "@/server/db/schema"
 
 type Event = H3Event<EventHandlerRequest>
 
-export type Session = typeof sessionsTable.$inferSelect
+export type Session = SessionSelect
 
-export type User = Omit<
-	typeof usersTable.$inferSelect,
-	"passwordHash" | "createdAt" | "updatedAt"
->
+export type User = Omit<UserSelect, "passwordHash">
 
 type SessionValidationResult =
 	| {
@@ -43,7 +45,7 @@ export const createSession = async ({
 }): Promise<Session> => {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)))
 
-	const sessionDuration = new TimeSpan(30, "d") // 30 days
+	const sessionDuration = new TimeSpan(30, "d")
 
 	const session: Session = {
 		id: sessionId,
@@ -51,6 +53,7 @@ export const createSession = async ({
 		expiresAt: new Date(Date.now() + sessionDuration.milliseconds())
 	}
 
+	await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId))
 	await db.insert(sessionsTable).values(session)
 
 	return session
@@ -61,31 +64,34 @@ export const validateSessionToken = async ({
 }: {
 	token: string
 }): Promise<SessionValidationResult> => {
-	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)))
-
-	const result = await db
-		.select({
-			user: usersTable,
-			session: sessionsTable
-		})
-		.from(sessionsTable)
-		.innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id))
-		.where(eq(sessionsTable.id, sessionId))
-		.get()
-
-	if (!result) {
+	if (!token) {
 		return { user: null, session: null }
 	}
 
-	const {
-		user: {
-			updatedAt: _updatedAt,
-			createdAt: _createdAt,
-			passwordHash: _passwordhash,
-			...user
-		},
-		session
-	} = result
+	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)))
+
+	const session = await db
+		.select()
+		.from(sessionsTable)
+		.where(eq(sessionsTable.id, sessionId))
+		.get()
+
+	if (!session) {
+		return { user: null, session: null }
+	}
+
+	const user = await db
+		.select()
+		.from(usersTable)
+		.where(eq(usersTable.id, session.userId))
+		.get()
+
+	if (!user) {
+		await invalidateSession({ sessionId })
+		return { user: null, session: null }
+	}
+
+	const { passwordHash: _passwordHash, ...userWithoutPassword } = user
 
 	const sessionDuration = new TimeSpan(30, "d")
 	const renewalThreshold = new TimeSpan(15, "d")
@@ -97,18 +103,18 @@ export const validateSessionToken = async ({
 	}
 
 	if (Date.now() >= session.expiresAt.getTime() - renewalThreshold.milliseconds()) {
-		session.expiresAt = createDate(sessionDuration)
+		const newExpiresAt = createDate(sessionDuration)
 
 		await db
 			.update(sessionsTable)
-			.set({
-				expiresAt: session.expiresAt
-			})
+			.set({ expiresAt: newExpiresAt })
 			.where(eq(sessionsTable.id, sessionId))
 			.execute()
+
+		session.expiresAt = newExpiresAt
 	}
 
-	return { user, session }
+	return { user: userWithoutPassword, session }
 }
 
 export const invalidateSession = async ({ sessionId }: { sessionId: string }) => {
@@ -148,15 +154,16 @@ export const deleteSessionTokenCookie = (event: Event) => {
 }
 
 export const getCurrentSession = async (event: Event) => {
-	const token = getCookie(event, "session")?.valueOf() ?? null
+	const token = getCookie(event, "session")?.valueOf()
 
-	if (token === null) {
+	if (!token) {
 		return null
 	}
 
 	const { session } = await validateSessionToken({ token })
 
 	if (!session) {
+		deleteSessionTokenCookie(event)
 		return null
 	}
 
@@ -164,15 +171,16 @@ export const getCurrentSession = async (event: Event) => {
 }
 
 export const getCurrentUser = async (event: Event) => {
-	const token = getCookie(event, "session")?.valueOf() ?? null
+	const token = getCookie(event, "session")?.valueOf()
 
-	if (token === null) {
+	if (!token) {
 		return null
 	}
 
 	const { user } = await validateSessionToken({ token })
 
 	if (!user) {
+		deleteSessionTokenCookie(event)
 		return null
 	}
 
@@ -180,8 +188,16 @@ export const getCurrentUser = async (event: Event) => {
 }
 
 export const setSession = async ({ userId, event }: { userId: string; event: Event }) => {
+	await invalidateUserSessions({ userId })
+
 	const token = generateSessionToken()
 	const session = await createSession({ token, userId })
 
+	if (!session) {
+		throw new Error("Failed to create session")
+	}
+
 	setSessionTokenCookie({ token, expiresAt: session.expiresAt, event })
+
+	return session
 }

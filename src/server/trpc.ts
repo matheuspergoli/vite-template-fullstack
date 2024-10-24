@@ -9,6 +9,7 @@ import { globalPOSTRateLimit } from "@/libs/rate-limit"
 import { TimeSpan } from "@/libs/time-span"
 
 import { db } from "./db/client"
+import { getCurrentSession, getCurrentUser } from "./services/sessions"
 
 interface ContextOptions extends FetchCreateContextFnOptions {
 	clientIP: string | undefined
@@ -121,6 +122,33 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 export const publicProcedure = t.procedure
 	.use(timingMiddleware)
 	.use(csrfProtectionMiddleware)
+
+export const authedProcedure = publicProcedure.use(async ({ ctx, next }) => {
+	if (!ctx.clientIP) {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: "Client IP missing"
+		})
+	}
+
+	const user = await getCurrentUser(ctx.event)
+	const session = await getCurrentSession(ctx.event)
+
+	if (!user?.id || !session?.userId) {
+		throw new TRPCError({
+			code: "UNAUTHORIZED",
+			message: "Not logged in"
+		})
+	}
+
+	return next({
+		ctx: {
+			user,
+			session,
+			clientIP: ctx.clientIP
+		}
+	})
+})
 
 export const {
 	router: createTRPCRouter,

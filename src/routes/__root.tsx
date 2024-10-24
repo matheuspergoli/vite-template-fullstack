@@ -14,12 +14,14 @@ export const Route = createRootRouteWithContext<{
 	queryClient: typeof queryClient
 	trpcQueryUtils: ReturnType<typeof createTRPCQueryUtils<AppRouter>>
 }>()({
-	component: () => {
-		return (
-			<>
-				<ScrollRestoration />
-				<Outlet />
-			</>
-		)
-	}
+	component: Root
 })
+
+function Root() {
+	return (
+		<>
+			<ScrollRestoration />
+			<Outlet />
+		</>
+	)
+}
