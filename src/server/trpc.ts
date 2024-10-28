@@ -5,7 +5,6 @@ import { getCookie, setCookie, type EventHandlerRequest, type H3Event } from "vi
 import { ZodError } from "zod"
 
 import { serverEnv } from "@/environment/server"
-import { globalPOSTRateLimit } from "@/libs/rate-limit"
 import { TimeSpan } from "@/libs/time-span"
 
 import { db } from "./db/client"
@@ -79,28 +78,6 @@ const csrfProtectionMiddleware = t.middleware(async ({ next, ctx }) => {
 	}
 
 	return next()
-})
-
-export const globalMutationRateLimitMiddleware = t.middleware(async ({ next, ctx }) => {
-	if (!ctx.clientIP) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: "Could not get client IP"
-		})
-	}
-
-	if (!globalPOSTRateLimit({ clientIP: ctx.clientIP })) {
-		throw new TRPCError({
-			code: "TOO_MANY_REQUESTS",
-			message: "Too many requests"
-		})
-	}
-
-	return next({
-		ctx: {
-			clientIP: ctx.clientIP
-		}
-	})
 })
 
 const timingMiddleware = t.middleware(async ({ next, path }) => {

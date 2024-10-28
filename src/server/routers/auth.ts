@@ -12,7 +12,6 @@ import {
 import { usersTable } from "../db/schema"
 import { setSession } from "../services/sessions"
 import { createTRPCRouter, publicProcedure } from "../trpc"
-import { generateId } from "../utils/generate-id"
 
 export const authRouter = createTRPCRouter({
 	login: publicProcedure
@@ -85,13 +84,11 @@ export const authRouter = createTRPCRouter({
 				})
 			}
 
-			const userId = generateId()
 			const hashedPassword = await hashPassword(input.password)
 
 			const user = await ctx.db
 				.insert(usersTable)
 				.values({
-					id: userId,
 					email: input.email,
 					passwordHash: hashedPassword
 				})

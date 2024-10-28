@@ -1,25 +1,71 @@
-import { sql } from "drizzle-orm"
-import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
+import {
+	customType,
+	index,
+	integer,
+	primaryKey,
+	sqliteTable,
+	text,
+	uniqueIndex
+} from "drizzle-orm/sqlite-core"
+
+import { generateId } from "../utils/generate-id"
+
+export type OauthProviderIds = "github" | "google"
+
+export const oauthProviderIds = customType<{ data: OauthProviderIds }>({
+	dataType() {
+		return "github"
+	}
+})
 
 export const usersTable = sqliteTable(
 	"users",
 	{
-		id: text("id").primaryKey(),
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => generateId()),
 		username: text("username"),
 		passwordHash: text("password_hash"),
 		email: text("email").unique().notNull(),
 		createdAt: integer("created_at", { mode: "timestamp_ms" })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`),
+			.$defaultFn(() => new Date()),
 		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
 			.notNull()
-			.default(sql`(CURRENT_TIMESTAMP)`)
-			.$onUpdate(() => sql`(CURRENT_TIMESTAMP)`)
+			.$defaultFn(() => new Date())
+			.$onUpdate(() => new Date())
 	},
 	(table) => {
 		return {
 			emailIdx: uniqueIndex("user_email_idx").on(table.email),
 			usernameIdx: index("user_username_idx").on(table.username)
+		}
+	}
+)
+
+export const oauthAccountsTable = sqliteTable(
+	"oauth_accounts",
+	{
+		providerUserId: text("provider_user_id").notNull(),
+		providerId: oauthProviderIds("provider_id").notNull(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => usersTable.id, { onDelete: "cascade" }),
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+			.notNull()
+			.$defaultFn(() => new Date())
+			.$onUpdate(() => new Date())
+	},
+	(table) => {
+		return {
+			pk: primaryKey({ columns: [table.providerId, table.providerUserId] }),
+			providerUserIdIdx: index("oauth_account_provider_user_id_idx").on(
+				table.providerUserId
+			),
+			userIdIdx: index("oauth_account_user_id_idx").on(table.userId)
 		}
 	}
 )
@@ -46,3 +92,6 @@ export type UserInsert = typeof usersTable.$inferInsert
 
 export type SessionSelect = typeof sessionsTable.$inferSelect
 export type SessionInsert = typeof sessionsTable.$inferInsert
+
+export type OauthAccountSelect = typeof oauthAccountsTable.$inferSelect
+export type OauthAccountInsert = typeof oauthAccountsTable.$inferInsert

@@ -34,6 +34,22 @@ export default createApp({
 			handler: "./src/server/index.ts",
 			base: "/trpc",
 			plugins: () => [react(), tsconfigPaths()]
+		},
+		{
+			name: "github-login",
+			type: "http",
+			target: "server",
+			handler: "./src/api/login/github/index.ts",
+			base: "/api/login/github",
+			plugins: () => [react(), tsconfigPaths()]
+		},
+		{
+			name: "github-callback",
+			type: "http",
+			target: "server",
+			handler: "./src/api/login/github/callback/index.ts",
+			base: "/api/login/github/callback",
+			plugins: () => [react(), tsconfigPaths()]
 		}
 	]
 })
