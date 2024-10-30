@@ -25,8 +25,8 @@ type SessionValidationResult =
 			user: User
 	  }
 	| {
-			session: null
-			user: null
+			session: undefined
+			user: undefined
 	  }
 
 export const generateSessionToken = () => {
@@ -65,7 +65,7 @@ export const validateSessionToken = async ({
 	token: string
 }): Promise<SessionValidationResult> => {
 	if (!token) {
-		return { user: null, session: null }
+		return { user: undefined, session: undefined }
 	}
 
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)))
@@ -77,7 +77,7 @@ export const validateSessionToken = async ({
 		.get()
 
 	if (!session) {
-		return { user: null, session: null }
+		return { user: undefined, session: undefined }
 	}
 
 	const user = await db
@@ -88,7 +88,7 @@ export const validateSessionToken = async ({
 
 	if (!user) {
 		await invalidateSession({ sessionId })
-		return { user: null, session: null }
+		return { user: undefined, session: undefined }
 	}
 
 	const { passwordHash: _passwordHash, ...userWithoutPassword } = user
@@ -99,7 +99,7 @@ export const validateSessionToken = async ({
 	if (!isWithinExpirationDate(session.expiresAt)) {
 		await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId))
 
-		return { user: null, session: null }
+		return { user: undefined, session: undefined }
 	}
 
 	if (Date.now() >= session.expiresAt.getTime() - renewalThreshold.milliseconds()) {
@@ -157,14 +157,14 @@ export const getCurrentSession = async (event: Event) => {
 	const token = getCookie(event, "session")?.valueOf()
 
 	if (!token) {
-		return null
+		return undefined
 	}
 
 	const { session } = await validateSessionToken({ token })
 
 	if (!session) {
 		deleteSessionTokenCookie(event)
-		return null
+		return undefined
 	}
 
 	return session
@@ -174,14 +174,14 @@ export const getCurrentUser = async (event: Event) => {
 	const token = getCookie(event, "session")?.valueOf()
 
 	if (!token) {
-		return null
+		return undefined
 	}
 
 	const { user } = await validateSessionToken({ token })
 
 	if (!user) {
 		deleteSessionTokenCookie(event)
-		return null
+		return undefined
 	}
 
 	return user

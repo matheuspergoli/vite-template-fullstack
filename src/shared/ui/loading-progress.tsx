@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react"
+import React from "react"
 
 import { Progress } from "@/shared/ui/progress"
 
 export const LoadingProgress = () => {
-	const [progress, setProgress] = useState(0)
+	const [progress, setProgress] = React.useState(0)
 
-	useEffect(() => {
+	React.useEffect(() => {
 		const timer = setTimeout(() => setProgress(66))
 		return () => clearTimeout(timer)
 	}, [])

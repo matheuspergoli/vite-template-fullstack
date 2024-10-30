@@ -6,7 +6,8 @@ import { LoadingProgress } from "./shared/ui/loading-progress"
 
 export const router = createRouter({
 	routeTree,
-	defaultPreload: "viewport",
+	defaultStaleTime: 0,
+	defaultPreload: "intent",
 	context: { api, queryClient, trpcQueryUtils },
 	defaultPendingComponent: () => <LoadingProgress />,
 	defaultErrorComponent: ({ error }) => <ErrorComponent error={error} />,
