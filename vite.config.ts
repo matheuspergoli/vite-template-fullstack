@@ -47,8 +47,24 @@ export default createApp({
 			name: "github-callback",
 			type: "http",
 			target: "server",
-			handler: "./src/api/login/github/callback/index.ts",
+			handler: "./src/api/login/github/callback.ts",
 			base: "/api/login/github/callback",
+			plugins: () => [react(), tsconfigPaths()]
+		},
+		{
+			name: "google-login",
+			type: "http",
+			target: "server",
+			handler: "./src/api/login/google/index.ts",
+			base: "/api/login/google",
+			plugins: () => [react(), tsconfigPaths()]
+		},
+		{
+			name: "google-callback",
+			type: "http",
+			target: "server",
+			handler: "./src/api/login/google/callback.ts",
+			base: "/api/login/google/callback",
 			plugins: () => [react(), tsconfigPaths()]
 		}
 	]
