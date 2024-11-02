@@ -12,7 +12,7 @@ import { generateId } from "../utils/generate-id"
 
 export type OauthProviderIds = "github" | "google"
 
-export const oauthProviderIds = customType<{ data: OauthProviderIds }>({
+const oauthProviderIds = customType<{ data: OauthProviderIds }>({
 	dataType() {
 		return "github"
 	}
