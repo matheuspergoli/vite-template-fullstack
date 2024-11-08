@@ -7,10 +7,10 @@ import {
 import { authedProcedure, createTRPCRouter, publicProcedure } from "../trpc"
 
 export const userRouter = createTRPCRouter({
-	assertGetCurrentSession: authedProcedure.query(async ({ ctx }) => {
+	assertGetCurrentSession: authedProcedure.query(({ ctx }) => {
 		return ctx.session
 	}),
-	assertGetCurrentUser: authedProcedure.query(async ({ ctx }) => {
+	assertGetCurrentUser: authedProcedure.query(({ ctx }) => {
 		return ctx.user
 	}),
 	getCurrentUser: publicProcedure.query(async ({ ctx }) => {

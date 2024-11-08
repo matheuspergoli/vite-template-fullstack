@@ -26,7 +26,7 @@ export const authRouter = createTRPCRouter({
 				where: eq(usersTable.email, input.email)
 			})
 
-			if (!existingUser || !existingUser.passwordHash) {
+			if (!existingUser?.passwordHash) {
 				throw new TRPCError({
 					code: "UNAUTHORIZED",
 					message: "Incorrect email or password"

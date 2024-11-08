@@ -33,6 +33,6 @@
 		"noUncheckedIndexedAccess": true,
 		"noFallthroughCasesInSwitch": true
 	},
-	"exclude": ["node_modules"],
-	"include": ["vite.config.ts", "src"]
+	"exclude": ["node_modules", ".vinxi", ".output"],
+	"include": ["vite.config.ts", "**/*.ts", "**/*.tsx"]
 }
