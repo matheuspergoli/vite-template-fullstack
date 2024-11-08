@@ -1,5 +1,3 @@
-import "server-only"
-
 import { GitHub, Google } from "arctic"
 
 import { serverEnv } from "@/environment/server"
