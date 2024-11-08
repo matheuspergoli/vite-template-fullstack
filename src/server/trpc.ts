@@ -1,3 +1,5 @@
+import "server-only"
+
 import { initTRPC, TRPCError } from "@trpc/server"
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch"
 import SuperJSON from "superjson"
