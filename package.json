@@ -28,7 +28,7 @@
 		"@tanstack/react-router": "^1.79.0",
 		"@trpc/react-query": "11.0.0-rc.571",
 		"@trpc/server": "11.0.0-rc.571",
-		"arctic": "^2.2.1",
+		"arctic": "^2.2.2",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
 		"drizzle-orm": "^0.36.1",
@@ -68,6 +68,6 @@
 		"typescript": "^5.6.3",
 		"typescript-eslint": "^8.13.0",
 		"vite": "^5.4.10",
-		"vite-tsconfig-paths": "^5.1.0"
+		"vite-tsconfig-paths": "^5.1.1"
 	}
 }

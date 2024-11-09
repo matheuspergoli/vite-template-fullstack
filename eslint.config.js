@@ -6,7 +6,7 @@ import globals from "globals"
 import tseslint from "typescript-eslint"
 
 export default tseslint.config(
-	{ ignores: [".vinxi", ".output", "node_modules"] },
+	{ ignores: [".vinxi", ".output", "node_modules", "**/*.config.{ts,tsx}"] },
 	{
 		extends: [
 			eslint.configs.recommended,
