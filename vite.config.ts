@@ -4,6 +4,22 @@ import { createApp } from "vinxi"
 import tsconfigPaths from "vite-tsconfig-paths"
 
 export default createApp({
+	server: {
+		routeRules: {
+			"/api/login/github": {
+				proxy: { to: "/api/login/github/index.ts" }
+			},
+			"/api/login/github/callback": {
+				proxy: { to: "/api/login/github/callback.ts" }
+			},
+			"/api/login/google": {
+				proxy: { to: "/api/login/google/index.ts" }
+			},
+			"/api/login/google/callback": {
+				proxy: { to: "/api/login/google/callback.ts" }
+			}
+		}
+	},
 	routers: [
 		{
 			name: "public",

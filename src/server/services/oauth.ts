@@ -6,7 +6,7 @@ import { getBaseUrl } from "@/libs/utils"
 export const github = new GitHub(
 	serverEnv.GITHUB_CLIENT_ID,
 	serverEnv.GITHUB_CLIENT_SECRET,
-	null
+	`${getBaseUrl()}/api/login/github/callback`
 )
 
 export const google = new Google(
