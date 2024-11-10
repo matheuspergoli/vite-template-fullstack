@@ -5,10 +5,14 @@ import {
 	httpBatchLink,
 	loggerLink
 } from "@trpc/react-query"
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server"
 import SuperJSON from "superjson"
 
 import { clientEnv } from "@/environment/client"
 import type { AppRouter } from "@/server/root"
+
+export type RouterInputs = inferRouterInputs<AppRouter>
+export type RouterOutputs = inferRouterOutputs<AppRouter>
 
 export const api = createTRPCReact<AppRouter>()
 
