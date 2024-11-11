@@ -2,26 +2,40 @@ import { TRPCError } from "@trpc/server"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
-import {
-	checkPasswordLeaks,
-	checkPasswordStrength,
-	hashPassword,
-	verifyPassword
-} from "@/libs/password"
+import { checkPasswordLeaks, checkPasswordStrength } from "@/libs/password-check"
 
 import { usersTable } from "../db/schema"
 import { setSession } from "../services/sessions"
 import { createTRPCRouter, publicProcedure } from "../trpc"
+import { hashPassword, verifyPassword } from "../utils/password-encrypt"
 
 export const authRouter = createTRPCRouter({
 	login: publicProcedure
 		.input(
 			z.object({
 				email: z.string().email(),
-				password: z.string().min(6).max(255)
+				password: z.string().min(6).max(100)
 			})
 		)
 		.mutation(async ({ input, ctx }) => {
+			const { feedback } = checkPasswordStrength(input.password)
+
+			if (feedback.warning) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Incorrect email or password"
+				})
+			}
+
+			const checkForPasswordLeaks = await checkPasswordLeaks(input.password)
+
+			if (checkForPasswordLeaks) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Incorrect email or password"
+				})
+			}
+
 			const existingUser = await ctx.db.query.usersTable.findFirst({
 				where: eq(usersTable.email, input.email)
 			})
@@ -51,7 +65,7 @@ export const authRouter = createTRPCRouter({
 		.input(
 			z.object({
 				email: z.string().email(),
-				password: z.string().min(6).max(255)
+				password: z.string().min(6).max(100)
 			})
 		)
 		.mutation(async ({ input, ctx }) => {

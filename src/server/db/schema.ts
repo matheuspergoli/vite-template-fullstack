@@ -24,7 +24,6 @@ export const usersTable = sqliteTable(
 		id: text("id")
 			.primaryKey()
 			.$defaultFn(() => generateId()),
-		username: text("username"),
 		passwordHash: text("password_hash"),
 		email: text("email").unique().notNull(),
 		createdAt: integer("created_at", { mode: "timestamp_ms" })
@@ -37,8 +36,7 @@ export const usersTable = sqliteTable(
 	},
 	(table) => {
 		return {
-			emailIdx: uniqueIndex("user_email_idx").on(table.email),
-			usernameIdx: index("user_username_idx").on(table.username)
+			emailIdx: uniqueIndex("user_email_idx").on(table.email)
 		}
 	}
 )

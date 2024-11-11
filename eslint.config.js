@@ -1,4 +1,5 @@
 import eslint from "@eslint/js"
+import pluginRouter from "@tanstack/eslint-plugin-router"
 import reactPlugin from "eslint-plugin-react"
 import reactHooks from "eslint-plugin-react-hooks"
 import reactRefresh from "eslint-plugin-react-refresh"
@@ -8,13 +9,14 @@ import tseslint from "typescript-eslint"
 export default tseslint.config(
 	{ ignores: [".vinxi", ".output", "node_modules", "**/*.config.{ts,tsx}"] },
 	{
+		files: ["**/*.{ts,tsx}"],
 		extends: [
 			eslint.configs.recommended,
 			...tseslint.configs.recommended,
 			...tseslint.configs.stylisticTypeChecked,
-			...tseslint.configs.recommendedTypeChecked
+			...tseslint.configs.recommendedTypeChecked,
+			...pluginRouter.configs["flat/recommended"]
 		],
-		files: ["**/*.{ts,tsx}"],
 		languageOptions: {
 			parserOptions: {
 				projectService: true
@@ -31,6 +33,15 @@ export default tseslint.config(
 			...reactHooks.configs.recommended.rules,
 			...reactPlugin.configs["jsx-runtime"].rules,
 			"react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+			"@typescript-eslint/only-throw-error": "off",
+			"@typescript-eslint/no-misused-promises": [
+				"error",
+				{
+					checksVoidReturn: {
+						attributes: false
+					}
+				}
+			],
 			"@typescript-eslint/no-unused-vars": [
 				"error",
 				{

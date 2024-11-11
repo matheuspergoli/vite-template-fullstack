@@ -1,20 +1,6 @@
-import { hash, verify } from "@node-rs/argon2"
 import { sha1 } from "@oslojs/crypto/sha1"
 import { encodeHexLowerCase } from "@oslojs/encoding"
 import zxcvbn from "zxcvbn"
-
-export const hashPassword = async (password: string) => {
-	return await hash(password, {
-		memoryCost: 19456,
-		timeCost: 2,
-		outputLen: 32,
-		parallelism: 1
-	})
-}
-
-export const verifyPassword = async (password: string, hash: string) => {
-	return await verify(hash, password)
-}
 
 export const checkPasswordStrength = (password: string) => {
 	const checkPasswordStrength = zxcvbn(password)

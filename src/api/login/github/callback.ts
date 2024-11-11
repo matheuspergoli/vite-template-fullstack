@@ -10,7 +10,6 @@ import { setSession } from "@/server/services/sessions"
 
 const GithubUser = z.object({
 	id: z.number(),
-	login: z.string(),
 	email: z.string().email()
 })
 
@@ -52,7 +51,6 @@ export default defineEventHandler(async (event) => {
 		const existingGithubUser = await db
 			.select({
 				id: usersTable.id,
-				username: usersTable.username,
 				email: usersTable.email
 			})
 			.from(usersTable)
@@ -74,8 +72,7 @@ export default defineEventHandler(async (event) => {
 		const newGithubUser = await db
 			.insert(usersTable)
 			.values({
-				email: githubUser.email,
-				username: githubUser.login
+				email: githubUser.email
 			})
 			.returning()
 			.then((res) => res[0] ?? null)

@@ -10,7 +10,6 @@ import { setSession } from "@/server/services/sessions"
 
 const GoogleUser = z.object({
 	sub: z.string(),
-	name: z.string(),
 	email: z.string().email()
 })
 
@@ -53,7 +52,6 @@ export default defineEventHandler(async (event) => {
 		const existingGoogleUser = await db
 			.select({
 				id: usersTable.id,
-				username: usersTable.username,
 				email: usersTable.email
 			})
 			.from(usersTable)
@@ -75,8 +73,7 @@ export default defineEventHandler(async (event) => {
 		const newGoogleUser = await db
 			.insert(usersTable)
 			.values({
-				email: googleUser.email,
-				username: googleUser.name
+				email: googleUser.email
 			})
 			.returning()
 			.then((res) => res[0] ?? null)
