@@ -2,12 +2,15 @@ import { TRPCError } from "@trpc/server"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
-import { checkPasswordLeaks, checkPasswordStrength } from "@/libs/password-check"
-
 import { usersTable } from "../db/schema"
 import { setSession } from "../services/sessions"
 import { createTRPCRouter, publicProcedure } from "../trpc"
-import { hashPassword, verifyPassword } from "../utils/password-encrypt"
+import {
+	checkPasswordLeaks,
+	checkPasswordStrength,
+	hashPassword,
+	verifyPassword
+} from "../utils/password"
 
 export const authRouter = createTRPCRouter({
 	login: publicProcedure

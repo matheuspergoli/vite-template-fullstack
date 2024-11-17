@@ -29,6 +29,9 @@ type SessionValidationResult =
 			user: undefined
 	  }
 
+const SESSION_DURATION = new TimeSpan(30, "d")
+const RENEWAL_THRESHOLD = new TimeSpan(15, "d")
+
 export const generateSessionToken = () => {
 	const tokenBytes = new Uint8Array(20)
 	crypto.getRandomValues(tokenBytes)
@@ -53,8 +56,10 @@ export const createSession = async ({
 		expiresAt: new Date(Date.now() + sessionDuration.milliseconds())
 	}
 
-	await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId))
-	await db.insert(sessionsTable).values(session)
+	await db.transaction(async (tx) => {
+		await tx.delete(sessionsTable).where(eq(sessionsTable.id, sessionId))
+		await tx.insert(sessionsTable).values(session)
+	})
 
 	return session
 }
@@ -70,40 +75,35 @@ export const validateSessionToken = async ({
 
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)))
 
-	const session = await db
-		.select()
+	const result = await db
+		.select({
+			session: sessionsTable,
+			user: {
+				id: usersTable.id,
+				email: usersTable.email,
+				createdAt: usersTable.createdAt,
+				updatedAt: usersTable.updatedAt
+			}
+		})
 		.from(sessionsTable)
+		.leftJoin(usersTable, eq(sessionsTable.userId, usersTable.id))
 		.where(eq(sessionsTable.id, sessionId))
 		.get()
 
-	if (!session) {
-		return { user: undefined, session: undefined }
-	}
-
-	const user = await db
-		.select()
-		.from(usersTable)
-		.where(eq(usersTable.id, session.userId))
-		.get()
-
-	if (!user) {
+	if (!result?.session || !result.user) {
 		await invalidateSession({ sessionId })
 		return { user: undefined, session: undefined }
 	}
 
-	const { passwordHash: _passwordHash, ...userWithoutPassword } = user
+	const { session, user } = result
 
-	const sessionDuration = new TimeSpan(30, "d")
-	const renewalThreshold = new TimeSpan(15, "d")
-
-	if (!isWithinExpirationDate(session.expiresAt)) {
-		await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId))
-
+	if (!isWithinExpirationDate(result.session.expiresAt)) {
+		await invalidateSession({ sessionId })
 		return { user: undefined, session: undefined }
 	}
 
-	if (Date.now() >= session.expiresAt.getTime() - renewalThreshold.milliseconds()) {
-		const newExpiresAt = createDate(sessionDuration)
+	if (Date.now() >= session.expiresAt.getTime() - RENEWAL_THRESHOLD.milliseconds()) {
+		const newExpiresAt = createDate(SESSION_DURATION)
 
 		await db
 			.update(sessionsTable)
@@ -114,7 +114,7 @@ export const validateSessionToken = async ({
 		session.expiresAt = newExpiresAt
 	}
 
-	return { user: userWithoutPassword, session }
+	return { user, session }
 }
 
 export const invalidateSession = async ({ sessionId }: { sessionId: string }) => {
@@ -181,6 +181,7 @@ export const getCurrentUser = async (event: Event) => {
 
 	if (!user) {
 		deleteSessionTokenCookie(event)
+
 		return undefined
 	}
 
