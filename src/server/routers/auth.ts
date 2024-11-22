@@ -62,7 +62,7 @@ export const authRouter = createTRPCRouter({
 				})
 			}
 
-			await setSession({ userId: existingUser.id, event: ctx.event })
+			await setSession({ userId: existingUser.id })
 		}),
 	signup: publicProcedure
 		.input(
@@ -119,6 +119,6 @@ export const authRouter = createTRPCRouter({
 				})
 			}
 
-			await setSession({ userId: user.id, event: ctx.event })
+			await setSession({ userId: user.id })
 		})
 })

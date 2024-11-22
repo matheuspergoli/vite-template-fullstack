@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server"
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch"
 import SuperJSON from "superjson"
-import { getCookie, setCookie, type EventHandlerRequest, type H3Event } from "vinxi/http"
+import { getCookie, getEvent, setCookie } from "vinxi/http"
 import { ZodError } from "zod"
 
 import { serverEnv } from "@/environment/server"
@@ -12,7 +12,6 @@ import { getCurrentSession, getCurrentUser } from "./services/sessions"
 
 interface ContextOptions extends FetchCreateContextFnOptions {
 	clientIP: string | undefined
-	event: H3Event<EventHandlerRequest>
 }
 
 export const createTRPCContext = (opts: ContextOptions) => {
@@ -21,7 +20,6 @@ export const createTRPCContext = (opts: ContextOptions) => {
 
 	return {
 		db,
-		event: opts.event,
 		request: opts.req,
 		clientIP: opts.clientIP
 	}
@@ -39,7 +37,8 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 })
 
 const csrfProtectionMiddleware = t.middleware(async ({ next, ctx }) => {
-	const { event, request } = ctx
+	const event = getEvent()
+	const { request } = ctx
 
 	if (request.method === "GET") {
 		const maxAge = new TimeSpan(30, "d")
@@ -108,8 +107,7 @@ export const authedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 		})
 	}
 
-	const user = await getCurrentUser(ctx.event)
-	const session = await getCurrentSession(ctx.event)
+	const [user, session] = await Promise.all([getCurrentUser(), getCurrentSession()])
 
 	if (!user?.id || !session?.userId) {
 		throw new TRPCError({

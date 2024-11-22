@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
 			.then((res) => res[0] ?? null)
 
 		if (existingGithubUser) {
-			await setSession({ event, userId: existingGithubUser.id })
+			await setSession({ userId: existingGithubUser.id })
 			return new Response(null, {
 				status: 302,
 				headers: {
@@ -101,7 +101,7 @@ export default defineEventHandler(async (event) => {
 			})
 		}
 
-		await setSession({ event, userId: newGithubUser.id })
+		await setSession({ userId: newGithubUser.id })
 
 		return new Response(null, {
 			status: 302,

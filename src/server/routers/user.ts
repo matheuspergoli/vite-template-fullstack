@@ -13,16 +13,16 @@ export const userRouter = createTRPCRouter({
 	assertGetCurrentUser: authedProcedure.query(({ ctx }) => {
 		return ctx.user
 	}),
-	getCurrentUser: publicProcedure.query(async ({ ctx }) => {
-		const user = await getCurrentUser(ctx.event)
+	getCurrentUser: publicProcedure.query(async () => {
+		const user = await getCurrentUser()
 		return user
 	}),
-	getCurrentSession: publicProcedure.query(async ({ ctx }) => {
-		const session = await getCurrentSession(ctx.event)
+	getCurrentSession: publicProcedure.query(async () => {
+		const session = await getCurrentSession()
 		return session
 	}),
 	logout: authedProcedure.mutation(async ({ ctx }) => {
 		await invalidateSession({ sessionId: ctx.session.id })
-		deleteSessionTokenCookie(ctx.event)
+		deleteSessionTokenCookie()
 	})
 })

@@ -1,7 +1,7 @@
 import { sha256 } from "@oslojs/crypto/sha2"
 import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding"
 import { eq } from "drizzle-orm"
-import { getCookie, setCookie, type EventHandlerRequest, type H3Event } from "vinxi/http"
+import { getCookie, getEvent, setCookie } from "vinxi/http"
 
 import { serverEnv } from "@/environment/server"
 import { createDate, isWithinExpirationDate, TimeSpan } from "@/libs/time-span"
@@ -12,8 +12,6 @@ import {
 	type SessionSelect,
 	type UserSelect
 } from "@/server/db/schema"
-
-type Event = H3Event<EventHandlerRequest>
 
 export type Session = SessionSelect
 
@@ -92,6 +90,7 @@ export const validateSessionToken = async ({
 
 	if (!result?.session || !result.user) {
 		await invalidateSession({ sessionId })
+
 		return { user: undefined, session: undefined }
 	}
 
@@ -99,6 +98,7 @@ export const validateSessionToken = async ({
 
 	if (!isWithinExpirationDate(result.session.expiresAt)) {
 		await invalidateSession({ sessionId })
+
 		return { user: undefined, session: undefined }
 	}
 
@@ -126,14 +126,14 @@ export const invalidateUserSessions = async ({ userId }: { userId: string }) => 
 }
 
 export const setSessionTokenCookie = ({
-	event,
 	token,
 	expiresAt
 }: {
-	event: Event
 	token: string
 	expiresAt: Date
 }) => {
+	const event = getEvent()
+
 	setCookie(event, "session", token, {
 		httpOnly: true,
 		path: "/",
@@ -143,7 +143,9 @@ export const setSessionTokenCookie = ({
 	})
 }
 
-export const deleteSessionTokenCookie = (event: Event) => {
+export const deleteSessionTokenCookie = () => {
+	const event = getEvent()
+
 	setCookie(event, "session", "", {
 		httpOnly: true,
 		path: "/",
@@ -153,7 +155,8 @@ export const deleteSessionTokenCookie = (event: Event) => {
 	})
 }
 
-export const getCurrentSession = async (event: Event) => {
+export const getCurrentSession = async () => {
+	const event = getEvent()
 	const token = getCookie(event, "session")?.valueOf()
 
 	if (!token) {
@@ -163,14 +166,16 @@ export const getCurrentSession = async (event: Event) => {
 	const { session } = await validateSessionToken({ token })
 
 	if (!session) {
-		deleteSessionTokenCookie(event)
+		deleteSessionTokenCookie()
+
 		return undefined
 	}
 
 	return session
 }
 
-export const getCurrentUser = async (event: Event) => {
+export const getCurrentUser = async () => {
+	const event = getEvent()
 	const token = getCookie(event, "session")?.valueOf()
 
 	if (!token) {
@@ -180,7 +185,7 @@ export const getCurrentUser = async (event: Event) => {
 	const { user } = await validateSessionToken({ token })
 
 	if (!user) {
-		deleteSessionTokenCookie(event)
+		deleteSessionTokenCookie()
 
 		return undefined
 	}
@@ -188,9 +193,9 @@ export const getCurrentUser = async (event: Event) => {
 	return user
 }
 
-export const setSession = async ({ userId, event }: { userId: string; event: Event }) => {
+export const setSession = async ({ userId }: { userId: string }) => {
 	await invalidateUserSessions({ userId })
-	deleteSessionTokenCookie(event)
+	deleteSessionTokenCookie()
 
 	const token = generateSessionToken()
 	const session = await createSession({ token, userId })
@@ -199,7 +204,7 @@ export const setSession = async ({ userId, event }: { userId: string; event: Eve
 		throw new Error("Failed to create session")
 	}
 
-	setSessionTokenCookie({ token, expiresAt: session.expiresAt, event })
+	setSessionTokenCookie({ token, expiresAt: session.expiresAt })
 
 	return session
 }

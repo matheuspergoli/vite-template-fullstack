@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
 			.then((res) => res[0] ?? null)
 
 		if (existingGoogleUser) {
-			await setSession({ event, userId: existingGoogleUser.id })
+			await setSession({ userId: existingGoogleUser.id })
 			return new Response(null, {
 				status: 302,
 				headers: {
@@ -102,7 +102,7 @@ export default defineEventHandler(async (event) => {
 			})
 		}
 
-		await setSession({ event, userId: newGoogleUser.id })
+		await setSession({ userId: newGoogleUser.id })
 
 		return new Response(null, {
 			status: 302,
