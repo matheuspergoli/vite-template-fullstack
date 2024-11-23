@@ -14,7 +14,6 @@ import {
 } from "@/server/db/schema"
 
 export type Session = SessionSelect
-
 export type User = Omit<UserSelect, "passwordHash">
 
 type SessionValidationResult =
@@ -33,8 +32,7 @@ const RENEWAL_THRESHOLD = new TimeSpan(15, "d")
 export const generateSessionToken = () => {
 	const tokenBytes = new Uint8Array(20)
 	crypto.getRandomValues(tokenBytes)
-	const token = encodeBase32LowerCaseNoPadding(tokenBytes)
-	return token
+	return encodeBase32LowerCaseNoPadding(tokenBytes)
 }
 
 export const createSession = async ({
@@ -46,12 +44,10 @@ export const createSession = async ({
 }): Promise<Session> => {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)))
 
-	const sessionDuration = new TimeSpan(30, "d")
-
 	const session: Session = {
 		id: sessionId,
 		userId,
-		expiresAt: new Date(Date.now() + sessionDuration.milliseconds())
+		expiresAt: new Date(Date.now() + SESSION_DURATION.milliseconds())
 	}
 
 	await db.transaction(async (tx) => {
@@ -90,7 +86,6 @@ export const validateSessionToken = async ({
 
 	if (!result?.session || !result.user) {
 		await invalidateSession({ sessionId })
-
 		return { user: undefined, session: undefined }
 	}
 
@@ -98,7 +93,6 @@ export const validateSessionToken = async ({
 
 	if (!isWithinExpirationDate(result.session.expiresAt)) {
 		await invalidateSession({ sessionId })
-
 		return { user: undefined, session: undefined }
 	}
 
@@ -167,7 +161,6 @@ export const getCurrentSession = async () => {
 
 	if (!session) {
 		deleteSessionTokenCookie()
-
 		return undefined
 	}
 
@@ -186,7 +179,6 @@ export const getCurrentUser = async () => {
 
 	if (!user) {
 		deleteSessionTokenCookie()
-
 		return undefined
 	}
 
@@ -205,6 +197,4 @@ export const setSession = async ({ userId }: { userId: string }) => {
 	}
 
 	setSessionTokenCookie({ token, expiresAt: session.expiresAt })
-
-	return session
 }
