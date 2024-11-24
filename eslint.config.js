@@ -21,8 +21,10 @@ export default tseslint.config(
 			parserOptions: {
 				projectService: true
 			},
-			ecmaVersion: 2020,
-			globals: globals.browser
+			globals: {
+				...globals.node,
+				...globals.browser
+			}
 		},
 		plugins: {
 			react: reactPlugin,

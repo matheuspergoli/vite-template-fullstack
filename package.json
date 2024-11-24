@@ -45,8 +45,6 @@
 		"@eslint/js": "^9.15.0",
 		"@ianvs/prettier-plugin-sort-imports": "^4.4.0",
 		"@tanstack/eslint-plugin-router": "^1.82.2",
-		"@tanstack/router-cli": "^1.81.9",
-		"@tanstack/router-devtools": "^1.82.2",
 		"@tanstack/router-plugin": "^1.81.9",
 		"@total-typescript/ts-reset": "^0.6.1",
 		"@types/node": "^22.9.3",
