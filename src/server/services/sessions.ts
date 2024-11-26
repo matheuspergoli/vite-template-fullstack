@@ -147,7 +147,7 @@ export const deleteSessionTokenCookie = () => {
 }
 
 export const getCurrentSession = async () => {
-	const token = getCookie("session")?.valueOf()
+	const token = getCookie("session")
 
 	if (!token) {
 		return undefined
@@ -164,7 +164,7 @@ export const getCurrentSession = async () => {
 }
 
 export const getCurrentUser = async () => {
-	const token = getCookie("session")?.valueOf()
+	const token = getCookie("session")
 
 	if (!token) {
 		return undefined

@@ -4,15 +4,12 @@ import {
 	ScrollRestoration
 } from "@tanstack/react-router"
 
-import { createTRPCQueryUtils } from "@trpc/react-query"
-
-import { api, queryClient } from "@/libs/trpc"
-import type { AppRouter } from "@/server/root"
+import { queryClient, trpc, trpcQueryUtils } from "@/libs/trpc"
 
 export const Route = createRootRouteWithContext<{
-	api: typeof api
+	trpc: typeof trpc
 	queryClient: typeof queryClient
-	trpcQueryUtils: ReturnType<typeof createTRPCQueryUtils<AppRouter>>
+	trpcQueryUtils: typeof trpcQueryUtils
 }>()({
 	component: Root
 })

@@ -1,6 +1,6 @@
 import { OAuth2RequestError } from "arctic"
 import { eq } from "drizzle-orm"
-import { defineEventHandler, getCookie, toWebRequest } from "vinxi/http"
+import { defineEventHandler, getCookie, getWebRequest } from "vinxi/http"
 import { z } from "zod"
 
 import { db } from "@/server/db/client"
@@ -13,13 +13,13 @@ const GithubUser = z.object({
 	email: z.string().email()
 })
 
-export default defineEventHandler(async (event) => {
-	const request = toWebRequest(event)
+export default defineEventHandler(async () => {
+	const request = getWebRequest()
 
 	const url = new URL(request.url)
 	const code = url.searchParams.get("code")
 	const state = url.searchParams.get("state")
-	const storedState = getCookie(event, "github_oauth_state")
+	const storedState = getCookie("github_oauth_state")
 
 	if (!code || !state || !storedState || state !== storedState) {
 		return new Response(null, {

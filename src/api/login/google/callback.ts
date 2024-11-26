@@ -1,6 +1,6 @@
 import { OAuth2RequestError } from "arctic"
 import { eq } from "drizzle-orm"
-import { defineEventHandler, getCookie, toWebRequest } from "vinxi/http"
+import { defineEventHandler, getCookie, getWebRequest } from "vinxi/http"
 import { z } from "zod"
 
 import { db } from "@/server/db/client"
@@ -13,14 +13,14 @@ const GoogleUser = z.object({
 	email: z.string().email()
 })
 
-export default defineEventHandler(async (event) => {
-	const request = toWebRequest(event)
+export default defineEventHandler(async () => {
+	const request = getWebRequest()
 
 	const url = new URL(request.url)
 	const code = url.searchParams.get("code")
 	const state = url.searchParams.get("state")
-	const storedState = getCookie(event, "google_oauth_state")
-	const codeVerifier = getCookie(event, "google_code_verifier")
+	const storedState = getCookie("google_oauth_state")
+	const codeVerifier = getCookie("google_code_verifier")
 
 	if (!code || !state || !storedState || state !== storedState || !codeVerifier) {
 		return new Response(null, {

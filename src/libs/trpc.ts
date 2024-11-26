@@ -14,11 +14,11 @@ import type { AppRouter } from "@/server/root"
 export type RouterInputs = inferRouterInputs<AppRouter>
 export type RouterOutputs = inferRouterOutputs<AppRouter>
 
-export const api = createTRPCReact<AppRouter>()
+export const trpc = createTRPCReact<AppRouter>()
 
 export const queryClient = new QueryClient()
 
-export const trpcClient = api.createClient({
+export const trpcClient = trpc.createClient({
 	links: [
 		loggerLink({
 			enabled: (opts) => {

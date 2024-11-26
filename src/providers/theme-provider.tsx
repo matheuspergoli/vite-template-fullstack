@@ -41,13 +41,14 @@ export const ThemeProvider = ({
 				: "light"
 
 			root.classList.add(systemTheme)
+
 			return
 		}
 
 		root.classList.add(theme)
 	}, [theme])
 
-	const value = {
+	const value: ThemeProviderState = {
 		theme,
 		setTheme: (theme: Theme) => {
 			localStorage.setItem(storageKey, theme)
@@ -65,8 +66,9 @@ export const ThemeProvider = ({
 export const useTheme = () => {
 	const context = React.useContext(ThemeProviderContext)
 
-	if (context === undefined)
+	if (context === undefined) {
 		throw new Error("useTheme must be used within a ThemeProvider")
+	}
 
 	return context
 }

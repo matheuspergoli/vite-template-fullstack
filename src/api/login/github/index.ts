@@ -4,11 +4,11 @@ import { defineEventHandler, setCookie } from "vinxi/http"
 import { serverEnv } from "@/environment/server"
 import { github } from "@/server/services/oauth"
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(() => {
 	const state = generateState()
 	const url = github.createAuthorizationURL(state, ["user:email"])
 
-	setCookie(event, "github_oauth_state", state, {
+	setCookie("github_oauth_state", state, {
 		path: "/",
 		secure: serverEnv.NODE_ENV === "production",
 		httpOnly: true,

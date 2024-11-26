@@ -40,8 +40,8 @@ const csrfProtectionMiddleware = t.middleware(async ({ next, ctx }) => {
 	const { request } = ctx
 
 	if (request.method === "GET") {
+		const token = getCookie("session")
 		const maxAge = new TimeSpan(30, "d")
-		const token = getCookie("session")?.valueOf()
 
 		if (token) {
 			setCookie("session", token, {
