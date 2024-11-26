@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server"
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch"
 import SuperJSON from "superjson"
-import { getCookie, getEvent, setCookie } from "vinxi/http"
+import { getCookie, setCookie } from "vinxi/http"
 import { ZodError } from "zod"
 
 import { serverEnv } from "@/environment/server"
@@ -37,15 +37,14 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 })
 
 const csrfProtectionMiddleware = t.middleware(async ({ next, ctx }) => {
-	const event = getEvent()
 	const { request } = ctx
 
 	if (request.method === "GET") {
 		const maxAge = new TimeSpan(30, "d")
-		const token = getCookie(event, "session")
+		const token = getCookie("session")?.valueOf()
 
 		if (token) {
-			setCookie(event, "session", token, {
+			setCookie("session", token, {
 				path: "/",
 				maxAge: maxAge.seconds(),
 				sameSite: "lax",

@@ -1,7 +1,7 @@
 import { sha256 } from "@oslojs/crypto/sha2"
 import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding"
 import { eq } from "drizzle-orm"
-import { getCookie, getEvent, setCookie } from "vinxi/http"
+import { getCookie, setCookie } from "vinxi/http"
 
 import { serverEnv } from "@/environment/server"
 import { createDate, isWithinExpirationDate, TimeSpan } from "@/libs/time-span"
@@ -32,7 +32,8 @@ const RENEWAL_THRESHOLD = new TimeSpan(15, "d")
 export const generateSessionToken = () => {
 	const tokenBytes = new Uint8Array(20)
 	crypto.getRandomValues(tokenBytes)
-	return encodeBase32LowerCaseNoPadding(tokenBytes)
+	const token = encodeBase32LowerCaseNoPadding(tokenBytes)
+	return token
 }
 
 export const createSession = async ({
@@ -126,9 +127,7 @@ export const setSessionTokenCookie = ({
 	token: string
 	expiresAt: Date
 }) => {
-	const event = getEvent()
-
-	setCookie(event, "session", token, {
+	setCookie("session", token, {
 		httpOnly: true,
 		path: "/",
 		secure: serverEnv.NODE_ENV === "production",
@@ -138,9 +137,7 @@ export const setSessionTokenCookie = ({
 }
 
 export const deleteSessionTokenCookie = () => {
-	const event = getEvent()
-
-	setCookie(event, "session", "", {
+	setCookie("session", "", {
 		httpOnly: true,
 		path: "/",
 		secure: serverEnv.NODE_ENV === "production",
@@ -150,8 +147,7 @@ export const deleteSessionTokenCookie = () => {
 }
 
 export const getCurrentSession = async () => {
-	const event = getEvent()
-	const token = getCookie(event, "session")?.valueOf()
+	const token = getCookie("session")?.valueOf()
 
 	if (!token) {
 		return undefined
@@ -168,8 +164,7 @@ export const getCurrentSession = async () => {
 }
 
 export const getCurrentUser = async () => {
-	const event = getEvent()
-	const token = getCookie(event, "session")?.valueOf()
+	const token = getCookie("session")?.valueOf()
 
 	if (!token) {
 		return undefined

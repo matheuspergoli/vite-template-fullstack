@@ -9,7 +9,7 @@ import {
 	DropdownMenuTrigger
 } from "@/shared/ui/dropdown-menu"
 
-export const ModeToggle = () => {
+const ThemeModeToggle = () => {
 	const { setTheme } = useTheme()
 
 	return (
@@ -29,3 +29,5 @@ export const ModeToggle = () => {
 		</DropdownMenu>
 	)
 }
+
+export { ThemeModeToggle }

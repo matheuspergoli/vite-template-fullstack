@@ -5,6 +5,9 @@ import tsconfigPaths from "vite-tsconfig-paths"
 
 export default createApp({
 	server: {
+		experimental: {
+			asyncContext: true
+		},
 		routeRules: {
 			"/api/login/github": {
 				proxy: { to: "/api/login/github/index.ts" }
@@ -33,14 +36,14 @@ export default createApp({
 			target: "browser",
 			base: "/",
 			plugins: () => [
+				react(),
+				tsconfigPaths(),
 				TanStackRouterVite({
 					quoteStyle: "double",
 					autoCodeSplitting: true,
 					routesDirectory: "./src/routes",
 					generatedRouteTree: "./src/routeTree.gen.ts"
-				}),
-				react(),
-				tsconfigPaths()
+				})
 			]
 		},
 		{
