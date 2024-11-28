@@ -1,11 +1,11 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
-import { defineEventHandler, getRequestIP, toWebRequest } from "vinxi/http"
+import { defineEventHandler, getRequestIP, getWebRequest } from "vinxi/http"
 
 import { appRouter, createTRPCContext } from "./root"
 
-export default defineEventHandler((event) => {
-	const request = toWebRequest(event)
-	const clientIP = getRequestIP(event)
+export default defineEventHandler(() => {
+	const request = getWebRequest()
+	const clientIP = getRequestIP()
 
 	return fetchRequestHandler({
 		endpoint: "/trpc",
