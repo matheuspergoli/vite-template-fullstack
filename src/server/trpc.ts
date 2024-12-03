@@ -124,9 +124,4 @@ export const authedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 	})
 })
 
-export const {
-	router: createTRPCRouter,
-	createCallerFactory,
-	middleware,
-	mergeRouters
-} = t
+export const { router: createTRPCRouter, middleware, mergeRouters } = t
