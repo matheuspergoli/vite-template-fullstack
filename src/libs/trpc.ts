@@ -1,10 +1,6 @@
 import { QueryClient } from "@tanstack/react-query"
-import {
-	createTRPCQueryUtils,
-	createTRPCReact,
-	httpBatchLink,
-	loggerLink
-} from "@trpc/react-query"
+import { httpBatchLink, loggerLink } from "@trpc/client"
+import { createTRPCQueryUtils, createTRPCReact } from "@trpc/react-query"
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server"
 import SuperJSON from "superjson"
 
