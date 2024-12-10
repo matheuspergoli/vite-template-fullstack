@@ -35,9 +35,7 @@ export const usersTable = sqliteTable(
 			.$onUpdate(() => new Date())
 	},
 	(table) => {
-		return {
-			emailIdx: uniqueIndex("user_email_idx").on(table.email)
-		}
+		return [uniqueIndex("user_email_idx").on(table.email)]
 	}
 )
 
@@ -58,13 +56,11 @@ export const oauthAccountsTable = sqliteTable(
 			.$onUpdate(() => new Date())
 	},
 	(table) => {
-		return {
-			pk: primaryKey({ columns: [table.providerId, table.providerUserId] }),
-			providerUserIdIdx: index("oauth_account_provider_user_id_idx").on(
-				table.providerUserId
-			),
-			userIdIdx: index("oauth_account_user_id_idx").on(table.userId)
-		}
+		return [
+			primaryKey({ columns: [table.providerId, table.providerUserId] }),
+			index("oauth_account_provider_user_id_idx").on(table.providerUserId),
+			index("oauth_account_user_id_idx").on(table.userId)
+		]
 	}
 )
 
@@ -78,10 +74,10 @@ export const sessionsTable = sqliteTable(
 		expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull()
 	},
 	(table) => {
-		return {
-			userIdIdx: index("session_user_id_idx").on(table.userId),
-			expiresAtIdx: index("session_expires_at_idx").on(table.expiresAt)
-		}
+		return [
+			index("session_user_id_idx").on(table.userId),
+			index("session_expires_at_idx").on(table.expiresAt)
+		]
 	}
 )
 
