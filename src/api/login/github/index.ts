@@ -2,7 +2,7 @@ import { generateState } from "arctic"
 import { defineEventHandler, setCookie } from "vinxi/http"
 
 import { serverEnv } from "@/environment/server"
-import { github } from "@/server/services/oauth"
+import { github } from "@/server/auth/oauth"
 
 export default defineEventHandler(() => {
 	const state = generateState()

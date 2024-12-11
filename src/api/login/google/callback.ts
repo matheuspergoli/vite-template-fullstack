@@ -3,10 +3,10 @@ import { eq } from "drizzle-orm"
 import { defineEventHandler, getCookie, getWebRequest } from "vinxi/http"
 import { z } from "zod"
 
+import { google } from "@/server/auth/oauth"
+import { setSession } from "@/server/auth/sessions"
 import { db } from "@/server/db/client"
 import { oauthAccountsTable, usersTable } from "@/server/db/schema"
-import { google } from "@/server/services/oauth"
-import { setSession } from "@/server/services/sessions"
 
 const GoogleUser = z.object({
 	sub: z.string(),

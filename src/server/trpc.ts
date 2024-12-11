@@ -7,8 +7,8 @@ import { ZodError } from "zod"
 import { serverEnv } from "@/environment/server"
 import { TimeSpan } from "@/libs/time-span"
 
+import { getCurrentSession, getCurrentUser } from "./auth/sessions"
 import { db } from "./db/client"
-import { getCurrentSession, getCurrentUser } from "./services/sessions"
 
 interface ContextOptions extends FetchCreateContextFnOptions {
 	clientIP: string | undefined

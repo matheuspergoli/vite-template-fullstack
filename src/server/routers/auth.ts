@@ -2,8 +2,8 @@ import { TRPCError } from "@trpc/server"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
+import { setSession } from "../auth/sessions"
 import { usersTable } from "../db/schema"
-import { setSession } from "../services/sessions"
 import { createTRPCRouter, publicProcedure } from "../trpc"
 import {
 	checkPasswordLeaks,
